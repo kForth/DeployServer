@@ -10,11 +10,11 @@ config = json.load(open('config.json'))
 
 @app.route('/update_kestin', methods=['POST'])
 def update_kestin():
-    digester = hmac.new(config['kestin']['github-secret'])
+    digester = hmac.new(bytearray(config['kestin']['github-secret'], 'utf-8'))
     headers = dict(request.headers)
     print(dict(headers))
-    if 'X-HubSignature' in headers.keys():
-        hub_sig = headers['X-HubSignature']
+    if 'X-Hub-Signature' in headers.keys():
+        hub_sig = headers['X-Hub-Signature'].split("=")[-1]
         print(hub_sig)
         if request.json:
             data = request.json
