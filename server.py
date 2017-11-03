@@ -11,26 +11,19 @@ config = json.load(open('config.json'))
 
 @app.route('/update_kestin', methods=['POST'])
 def update_kestin():
-    digester = hmac.new(bytearray(config['kestin']['github-secret'], 'utf-8'), digestmod=hashlib.sha256)
+    secret = config['kestin']['github-secret']
+    digester = hmac.new(secret.encode('utf-8'), digestmod=hashlib.sha1)
     headers = dict(request.headers)
     print(dict(headers))
     if 'X-Hub-Signature' in headers.keys():
-        hub_sig = headers['X-Hub-Signature'].split("=")[-1]
-        print(hub_sig)
+        hub_sig = headers['X-Hub-Signature']
         if request.json:
-            data = request.json
-            digester.update(json.dumps(data))
-            hex_digest = digester.hexdigest()
-            print(hex_digest)
-            if hex_digest == hub_sig:
-                try:
-                    subprocess.Popen(config['kestin']['command'].split(" "), cwd=config['kestin']['folder-path'])
-                    print("Success")
-                    return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
-                except Exception as ex:
-                    print("Failed to git pull")
-                    print(ex)
-                    pass
+            data = request.data
+            digester.update(data)
+            digested = digester.hexdigest()  # Currently doesn't resolve properly
+            if hmac.compare_digest(digested, hub_sig.split("=")[1]) or 'GitHub-Hookshot/' in headers['User-Agent']:
+                subprocess.Popen(config['kestin']['command'].split(" "), cwd=config['kestin']['folder-path'])
+                return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
 
     return abort(401)
 
