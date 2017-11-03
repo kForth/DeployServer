@@ -1,5 +1,6 @@
 import json
 import hmac
+import hashlib
 import subprocess
 
 from flask import Flask, jsonify, make_response, request, abort
@@ -10,7 +11,7 @@ config = json.load(open('config.json'))
 
 @app.route('/update_kestin', methods=['POST'])
 def update_kestin():
-    digester = hmac.new(bytearray(config['kestin']['github-secret'], 'utf-8'))
+    digester = hmac.new(bytearray(config['kestin']['github-secret'], 'utf-8'), digestmod=hashlib.sha256)
     headers = dict(request.headers)
     print(dict(headers))
     if 'X-Hub-Signature' in headers.keys():
