@@ -1,0 +1,7 @@
+{
+  "kestin": {
+    "github_secret": "",
+    "folder_path": "/var/www/Kestin",
+    "command": "git pull"
+  }
+}
