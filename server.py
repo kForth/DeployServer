@@ -22,7 +22,7 @@ def update_kestin():
             data = request.data
             digester.update(data)
             digested = digester.hexdigest()  # Currently doesn't resolve properly
-            if 'GitHub-Hookshot' in user_agent in hmac.compare_digest(digested, hub_sig.split("=")[1]):
+            if 'GitHub-Hookshot' in user_agent or hmac.compare_digest(digested, hub_sig.split("=")[1]):
                 subprocess.Popen(config['kestin']['command'].split(" "), cwd=config['kestin']['folder-path'])
                 return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
 
