@@ -16,13 +16,13 @@ def update_kestin():
     headers = dict(request.headers)
     print(dict(headers))
     if 'X-Hub-Signature' in headers.keys():
-        hub_sig = headers['X-Hub-Signature']
+        hub_sig = str(headers['X-Hub-Signature']).encode('ascii', 'ignore')
         user_agent = str(headers['User-Agent']).encode('ascii', 'ignore')
         if request.json:
             data = request.data
             digester.update(data)
             digested = digester.hexdigest()  # Currently doesn't resolve properly
-            if hmac.compare_digest(digested, hub_sig.split("=")[1]) or 'GitHub-Hookshot' in user_agent:
+            if 'GitHub-Hookshot' in user_agent in hmac.compare_digest(digested, hub_sig.split("=")[1]):
                 subprocess.Popen(config['kestin']['command'].split(" "), cwd=config['kestin']['folder-path'])
                 return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
 
