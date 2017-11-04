@@ -14,12 +14,11 @@ def handle_site_update_request(key):
     conf = config[key]
     headers = dict(request.headers)
     if request.json:
-        if False and 'github-secret' in conf.keys() and conf['github-secret']:  # This doesn't work right now so don't bother.
-            hub_sig = str(headers['X-Hub-Signature'])
-            verified = verify_github_signature(conf['github-secret'], request.data, hub_sig)
+        # This doesn't work right now so don't bother.
+        if False and 'github-secret' in conf.keys() and conf['github-secret']:
+            verified = verify_github_signature(conf['github-secret'], request.data, str(headers['X-Hub-Signature']))
         else:
-            user_agent = str(headers['User-Agent'])
-            verified = 'GitHub-Hookshot' in user_agent
+            verified = 'GitHub-Hookshot' in str(headers['User-Agent'])
 
         if verified:
             command = conf['command']
