@@ -15,10 +15,10 @@ def handle_site_update_request(site_key):
     headers = dict(request.headers)
     if 'X-Hub-Signature' in headers.keys() and request.json:
         hub_sig = str(headers['X-Hub-Signature'])
-        github_verified = verify_github_signature(secret, request.data, hub_sig)
         user_agent = str(headers['User-Agent'])
-        print(user_agent)
-        if 'GitHub-Hookshot' in user_agent or github_verified:
+
+        # Temporary short circuit until I fix verification
+        if 'GitHub-Hookshot' in user_agent or verify_github_signature(secret, request.data, hub_sig):
             command = config[site_key]['command']
             if type(command) is not list:
                 command = [command]
