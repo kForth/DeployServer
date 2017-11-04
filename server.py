@@ -18,11 +18,16 @@ def handle_site_update_request(site_key):
     secret = config[site_key]['github-secret']
     headers = dict(request.headers)
     if 'X-Hub-Signature' in headers.keys() and request.json:
-        hub_sig = str(headers['X-Hub-Signature']).encode('ascii', 'ignore')
+        hub_sig = str(headers['X-Hub-Signature'])
         github_verified = verify_github_signature(secret, request.data, hub_sig)
-        user_agent = str(headers['User-Agent']).encode('ascii', 'ignore')
+        user_agent = str(headers['User-Agent'])
+        print(user_agent)
         if 'GitHub-Hookshot' in user_agent or github_verified:
-            subprocess.Popen(config[site_key]['command'].split(" "), cwd=config[site_key]['folder-path'])
+            command = config[site_key]['command']
+            if type(command) is not list:
+                command = [command]
+            for cmd in command:
+                subprocess.Popen(cmd.split(" "), cwd=config[site_key]['folder-path']).wait()
             return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
     return abort(400)
 
