@@ -11,22 +11,28 @@ config = json.load(open(app.root_path + '/config.json'))
 
 @app.route('/update_kestin', methods=['POST'])
 def update_kestin():
-    secret = config['kestin']['github-secret']
-    digester = hmac.new(secret.encode('utf-8'), digestmod=hashlib.sha1)
-    headers = dict(request.headers)
-    print(dict(headers))
-    if 'X-Hub-Signature' in headers.keys():
-        hub_sig = str(headers['X-Hub-Signature']).encode('ascii', 'ignore')
-        user_agent = str(headers['User-Agent']).encode('ascii', 'ignore')
-        if request.json:
-            data = request.data
-            digester.update(data)
-            digested = digester.hexdigest()  # Currently doesn't resolve properly
-            if 'GitHub-Hookshot' in user_agent or hmac.compare_digest(digested, hub_sig.split("=")[1]):
-                subprocess.Popen(config['kestin']['command'].split(" "), cwd=config['kestin']['folder-path'])
-                return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
+    return handle_site_update_request('kestin')
 
-    return abort(401)
+
+def handle_site_update_request(site_key):
+    secret = config[site_key]['github-secret']
+    headers = dict(request.headers)
+    if 'X-Hub-Signature' in headers.keys() and request.json:
+        hub_sig = str(headers['X-Hub-Signature']).encode('ascii', 'ignore')
+        github_verified = verify_github_signature(secret, request.data, hub_sig)
+        user_agent = str(headers['User-Agent']).encode('ascii', 'ignore')
+        if 'GitHub-Hookshot' in user_agent or github_verified:
+            subprocess.Popen(config[site_key]['command'].split(" "), cwd=config[site_key]['folder-path'])
+            return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
+    return abort(400)
+
+
+def verify_github_signature(key, payload, signature):
+    digester = hmac.new(key.encode('utf-8'), digestmod=hashlib.sha1)
+    digester.update(payload)
+    digested = digester.hexdigest()  # Currently doesn't resolve properly or something
+    return hmac.compare_digest(digested, str(signature).split('=')[1])
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5050)
