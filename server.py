@@ -6,7 +6,7 @@ import subprocess
 from flask import Flask, jsonify, make_response, request, abort
 
 app = Flask(__name__)
-config = json.load(open('config.json'))
+config = json.load(open(app.root_path + 'config.json'))
 
 
 @app.route('/update_kestin', methods=['POST'])
