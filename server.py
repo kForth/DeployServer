@@ -1,16 +1,13 @@
-import json
-import hmac
 import hashlib
+import hmac
+import json
 import subprocess
 
-from flask import Flask, jsonify, make_response, request, abort
+from flask import Flask, abort, jsonify, make_response, request
 
-app = Flask(__name__)
-config = json.load(open(app.root_path + '/config.json'))
 
-app.add_url_rule('/update_kestin', lambda: handle_site_update_request('kestin'))
-app.add_url_rule('/update_clooney', lambda: handle_site_update_request('clooney'))
-app.add_url_rule('/update_deploy', lambda: handle_site_update_request('deploy'))
+def add_url_rule(route, func, methods=('POST',), url_prefix=""):
+    app.add_url_rule(url_prefix + route, route, view_func=func, methods=methods)
 
 
 def handle_site_update_request(site_key):
@@ -37,6 +34,13 @@ def verify_github_signature(key, payload, signature):
     digested = digester.hexdigest()  # Currently doesn't resolve properly or something
     return hmac.compare_digest(digested, str(signature).split('=')[1])
 
+
+app = Flask(__name__)
+config = json.load(open(app.root_path + '/config.json'))
+
+add_url_rule('/update_kestin', lambda: handle_site_update_request('kestin'))
+add_url_rule('/update_clooney', lambda: handle_site_update_request('clooney'))
+add_url_rule('/update_deploy', lambda: handle_site_update_request('deploy'))
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5050)
