@@ -1,5 +1,7 @@
 This is a simple server to run pre-configured commands when a github webhook is received.
 
+It currently doesn't verify the request beyond checking the UserAgent, but if you provide a secret for the webhook it will eventually verify it.
+
 Sample config.json:
 ```json
 {
@@ -9,7 +11,6 @@ Sample config.json:
     "command":        "git pull"
   },
   "clooney": {
-    "github-secret":  "SomethingElseSecretHopefully",
     "folder-path":    "/var/www/Clooney",
     "command":        ["git pull", "echo Done!"]
   }
