@@ -8,10 +8,9 @@ from flask import Flask, jsonify, make_response, request, abort
 app = Flask(__name__)
 config = json.load(open(app.root_path + '/config.json'))
 
-
-@app.route('/update_kestin', methods=['POST'])
-def update_kestin():
-    return handle_site_update_request('kestin')
+app.add_url_rule('/update_kestin', lambda: handle_site_update_request('kestin'))
+app.add_url_rule('/update_clooney', lambda: handle_site_update_request('clooney'))
+app.add_url_rule('/update_deploy', lambda: handle_site_update_request('deploy'))
 
 
 def handle_site_update_request(site_key):
