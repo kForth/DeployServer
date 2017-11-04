@@ -38,9 +38,8 @@ def verify_github_signature(key, payload, signature):
 app = Flask(__name__)
 config = json.load(open(app.root_path + '/config.json'))
 
-add_url_rule('/update_kestin', lambda: handle_site_update_request('kestin'))
-add_url_rule('/update_clooney', lambda: handle_site_update_request('clooney'))
-add_url_rule('/update_deploy', lambda: handle_site_update_request('deploy'))
+for site_key in config.keys():
+    add_url_rule('/update_{}'.format(site_key), lambda: handle_site_update_request(site_key))
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=5050)
