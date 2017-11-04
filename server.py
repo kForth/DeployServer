@@ -10,20 +10,23 @@ def add_url_rule(route, func, methods=('POST',), url_prefix=""):
     app.add_url_rule(url_prefix + route, route, view_func=func, methods=methods)
 
 
-def handle_site_update_request(site_key):
-    secret = config[site_key]['github-secret']
+def handle_site_update_request(key):
+    conf = config[key]
     headers = dict(request.headers)
-    if 'X-Hub-Signature' in headers.keys() and request.json:
-        hub_sig = str(headers['X-Hub-Signature'])
-        user_agent = str(headers['User-Agent'])
+    if request.json:
+        if False and 'github-secret' in conf.keys() and conf['github-secret']:  # This doesn't work right now so don't bother.
+            hub_sig = str(headers['X-Hub-Signature'])
+            verified = verify_github_signature(conf['github-secret'], request.data, hub_sig)
+        else:
+            user_agent = str(headers['User-Agent'])
+            verified = 'GitHub-Hookshot' in user_agent
 
-        # Temporary short circuit until I fix verification
-        if 'GitHub-Hookshot' in user_agent or verify_github_signature(secret, request.data, hub_sig):
-            command = config[site_key]['command']
+        if verified:
+            command = conf['command']
             if type(command) is not list:
                 command = [command]
             for cmd in command:
-                subprocess.Popen(cmd.split(" "), cwd=config[site_key]['folder-path']).wait()
+                subprocess.Popen(cmd.split(" "), cwd=conf['folder-path']).wait()
             return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
     return abort(400)
 
