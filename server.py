@@ -20,6 +20,10 @@ def handle_site_update_request(key):
         else:
             verified = 'GitHub-Hookshot' in str(headers['User-Agent'])
 
+        if verified and 'branch' in conf.keys():
+            branch = conf['branch']
+            verified = request.json['ref'][-len(branch):] == branch
+
         if verified:
             command = conf['command']
             if type(command) is not list:
