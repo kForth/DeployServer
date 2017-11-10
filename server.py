@@ -48,7 +48,7 @@ config = json.load(open(app.root_path + '/config.json'))
 
 @app.route('/test/')
 def test():
-    return "Test"
+    return "<b>It Works!</b>"
 
 for site_key in config.keys():
     add_url_rule('/update_{}'.format(site_key), lambda: handle_site_update_request(site_key))
