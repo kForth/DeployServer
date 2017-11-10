@@ -11,7 +11,7 @@ def add_url_rule(route, func, methods=('POST',), url_prefix=""):
 
 
 def handle_site_update_request(key):
-    print("Request to update {}".format(key))
+    app.logger.info("Request to update {}".format(key))
     conf = config[key]
     headers = dict(request.headers)
     if request.json:
@@ -26,7 +26,7 @@ def handle_site_update_request(key):
             verified = request.json['ref'][-len(branch):] == branch
 
         if verified:
-            print("{} Verified and Updating")
+            app.logger.info("{} Verified and Updating")
             command = conf['command']
             if type(command) is not list:
                 command = [command]
