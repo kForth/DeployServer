@@ -1,4 +1,5 @@
 .idea/
 env/
 config.json
-sample.json
+*.json
+*.wsgi
