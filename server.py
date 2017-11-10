@@ -14,17 +14,18 @@ def handle_site_update_request(key):
     conf = config[key]
     headers = dict(request.headers)
     if request.json:
+        verified = False
         # This doesn't work right now so don't bother.
         if False and 'github-secret' in conf.keys() and conf['github-secret']:
             verified = verify_github_signature(conf['github-secret'], request.data, str(headers['X-Hub-Signature']))
-        else:
+        elif 'User-Agent' in headers.keys():
             verified = 'GitHub-Hookshot' in str(headers['User-Agent'])
 
         if verified and 'branch' in conf.keys():
             branch = conf['branch']
             verified = request.json['ref'][-len(branch):] == branch
 
-        if verified:
+        if verified and 'command' in conf.keys() and 'folder-path' in conf.keys():
             command = conf['command']
             if type(command) is not list:
                 command = [command]
