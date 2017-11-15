@@ -35,7 +35,7 @@ def handle_site_update_request(key):
         if 'save-packets' in conf.keys() and conf['save-packets']:
             save_packet(headers, request.json)
         verified = False
-        if 'github-secret' in conf.keys() and conf['github-secret']:
+        if False and 'github-secret' in conf.keys() and conf['github-secret']:
             verified = verify_github_signature(conf['github-secret'], request.data, request.headers.get('X-Hub-Signature'))
         elif 'User-Agent' in headers.keys():
             verified = 'GitHub-Hookshot' in str(headers['User-Agent'])
