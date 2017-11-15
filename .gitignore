@@ -1,6 +1,5 @@
 .idea/
 env/
-config.json
 *.json
 *.wsgi
 *.pyc
