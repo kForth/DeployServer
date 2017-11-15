@@ -1,7 +1,7 @@
-import hashlib
 import hmac
 import json
 import subprocess
+from hashlib import sha1
 
 from flask import Flask, abort, jsonify, make_response, request
 
@@ -16,10 +16,14 @@ def add_url_rule(route, func, methods=('POST',), url_prefix=""):
 
 
 def commit_packets():
+    global packets
     json.dump(packets, open(app.root_path + '/packets.json', "w+"))
 
 
 def save_packet(headers, data):
+    global packets
+    if len(packets) > 10:
+        packets = []
     packets.append({'headers': headers, 'data': data})
     commit_packets()
 
@@ -33,7 +37,7 @@ def handle_site_update_request(key):
         verified = False
         # This doesn't work right now so don't bother.
         if False and 'github-secret' in conf.keys() and conf['github-secret']:
-            verified = verify_github_signature(conf['github-secret'], request.data, str(headers['X-Hub-Signature']))
+            verified = verify_github_signature(conf['github-secret'], request.data, request.headers.get('X-Hub-Signature'))
         elif 'User-Agent' in headers.keys():
             verified = 'GitHub-Hookshot' in str(headers['User-Agent'])
 
@@ -51,16 +55,16 @@ def handle_site_update_request(key):
     return abort(400)
 
 
-def verify_github_signature(key, payload, signature):
-    digester = hmac.new(key.encode('utf-8'), digestmod=hashlib.sha1)
-    digester.update(payload)
-    digested = digester.hexdigest()  # Currently doesn't resolve properly or something
-    return hmac.compare_digest(digested, str(signature).split('=')[1])
+def verify_github_signature(key, data, signature):
+    digester = hmac.new(bytes(key, 'UTF-8'), msg=data, digestmod=sha1)
+    digested = "sha1=" + digester.hexdigest()  # Currently doesn't resolve properly or something
+    return hmac.compare_digest(str(digested), str(signature))
 
 
 @app.route('/test/')
 def test():
     return "<b>It Works!</b>"
+
 
 for site_key in config.keys():
     add_url_rule('/update_{}'.format(site_key), lambda: handle_site_update_request(site_key))
