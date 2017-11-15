@@ -55,7 +55,7 @@ def handle_site_update_request(key):
 
 
 def verify_github_signature(key, data, signature):
-    digester = hmac.new(bytes(key, 'UTF-8'), msg=data, digestmod=sha1)
+    digester = hmac.new(key.encode('UTF-8'), msg=data, digestmod=sha1)
     digested = "sha1=" + digester.hexdigest()
     return hmac.compare_digest(str(digested), str(signature))
 
