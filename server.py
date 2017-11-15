@@ -35,8 +35,7 @@ def handle_site_update_request(key):
         if 'save-packets' in conf.keys() and conf['save-packets']:
             save_packet(headers, request.json)
         verified = False
-        # This doesn't work right now so don't bother.
-        if False and 'github-secret' in conf.keys() and conf['github-secret']:
+        if 'github-secret' in conf.keys() and conf['github-secret']:
             verified = verify_github_signature(conf['github-secret'], request.data, request.headers.get('X-Hub-Signature'))
         elif 'User-Agent' in headers.keys():
             verified = 'GitHub-Hookshot' in str(headers['User-Agent'])
@@ -57,7 +56,7 @@ def handle_site_update_request(key):
 
 def verify_github_signature(key, data, signature):
     digester = hmac.new(bytes(key, 'UTF-8'), msg=data, digestmod=sha1)
-    digested = "sha1=" + digester.hexdigest()  # Currently doesn't resolve properly or something
+    digested = "sha1=" + digester.hexdigest()
     return hmac.compare_digest(str(digested), str(signature))
 
 
