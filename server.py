@@ -5,15 +5,31 @@ import subprocess
 
 from flask import Flask, abort, jsonify, make_response, request
 
+app = Flask(__name__)
+
+config = json.load(open(app.root_path + '/config.json'))
+packets = json.load(open(app.root_path + '/packets.json'))
+
 
 def add_url_rule(route, func, methods=('POST',), url_prefix=""):
     app.add_url_rule(url_prefix + route, route, view_func=func, methods=methods)
+
+
+def commit_packets():
+    json.dump(packets, open(app.root_path + '/packets.json', "w+"))
+
+
+def save_packet(headers, data):
+    packets.append({'headers': headers, 'data': data})
+    commit_packets()
 
 
 def handle_site_update_request(key):
     conf = config[key]
     headers = dict(request.headers)
     if request.json:
+        if 'save_packets' in conf.keys() and conf['save_packets']:
+            save_packet(headers, request.json)
         verified = False
         # This doesn't work right now so don't bother.
         if False and 'github-secret' in conf.keys() and conf['github-secret']:
@@ -42,10 +58,6 @@ def verify_github_signature(key, payload, signature):
     return hmac.compare_digest(digested, str(signature).split('=')[1])
 
 
-app = Flask(__name__)
-config = json.load(open(app.root_path + '/config.json'))
-
-
 @app.route('/test/')
 def test():
     return "<b>It Works!</b>"
@@ -54,4 +66,4 @@ for site_key in config.keys():
     add_url_rule('/update_{}'.format(site_key), lambda: handle_site_update_request(site_key))
 
 if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port=5050)
+    app.run(host="0.0.0.0", port=5050, debug=True)
