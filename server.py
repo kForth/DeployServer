@@ -28,7 +28,7 @@ def handle_site_update_request(key):
     conf = config[key]
     headers = dict(request.headers)
     if request.json:
-        if 'save_packets' in conf.keys() and conf['save_packets']:
+        if 'save-packets' in conf.keys() and conf['save-packets']:
             save_packet(headers, request.json)
         verified = False
         # This doesn't work right now so don't bother.
