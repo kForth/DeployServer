@@ -4,13 +4,13 @@ The server currently verifies that the UserAgent matches Github, one day it will
 
 Options:
 
-| Key            | Description
-| :---           | :------------------------------------------------------------------------------------------------------------------------------------------- |
-| *folder-path*  | The absolute path for where you want the commands run.                                                                                |
-| *command*      | The commands you want to run. Use a list for multiple commands. These commands should appear exactly as you'd enter then in the shell." |
-| *branch*       | If present, it will verify the branch pushed to otherwise it will run the commands for any push event.                                     |
-| *gihub-secret* | If present, it will verify Github's provided signature before running the commands.                                                  |
-| *save-packets* | If present and true, packets will be saved to packets.json. This is useful for debugging.                                            |
+| Key             | Description
+| :---            | :------------------------------------------------------------------------------------------------------------------------------------------- |
+| *folder-path*   | The absolute path for where you want the commands run.                                                                                |
+| *command*       | The commands you want to run. Use a list for multiple commands. These commands should appear exactly as you'd enter then in the shell." |
+| *branch*        | If present, it will verify the branch pushed to otherwise it will run the commands for any push event.                                     |
+| *github-secret* | If present, it will verify Github's provided signature before running the commands.                                                  |
+| *save-packets*  | If present and true, packets will be saved to packets.json. This is useful for debugging.                                            |
 
 
 Sample config.json:
@@ -25,7 +25,7 @@ Sample config.json:
   "clooney": {
     "branch":         "restructure",
     "folder-path":    "/var/www/Clooney",
-    "command":        ["git pull", "echo Done!"]
+    "command":        ["echo 'I've been hooked!'"]
   }
 }
 ```
