@@ -29,3 +29,5 @@ Sample config.json:
   }
 }
 ```
+
+If you need help setting it up check out [this](https://github.com/kForth/SimpleWsgiFlask/) crude guide/example.
