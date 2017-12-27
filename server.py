@@ -11,10 +11,6 @@ config = json.load(open(app.root_path + '/config.json'))
 packets = json.load(open(app.root_path + '/packets.json'))
 
 
-def add_url_rule(route, func, methods=('POST',), url_prefix=""):
-    app.add_url_rule(url_prefix + route, route, view_func=func, methods=methods)
-
-
 def commit_packets():
     global packets
     json.dump(packets, open(app.root_path + '/packets.json', "w+"))
@@ -28,10 +24,18 @@ def save_packet(headers, data):
     commit_packets()
 
 
-def handle_site_update_request(key):
-    conf = config[key]
-    headers = dict(request.headers)
+def verify_github_signature(key, data, signature):
+    digester = hmac.new(key.encode('UTF-8'), msg=data, digestmod=sha1)
+    digested = "sha1=" + digester.hexdigest()
+    return hmac.compare_digest(str(digested), str(signature))
+
+
+@app.route('/')
+def handle_request():
     if request.json:
+        repo_name = request.json['repository']['name']
+        headers = request.headers
+        conf = [e for e in config if e['name'] == repo_name][-1]
         if 'save-packets' in conf.keys() and conf['save-packets']:
             save_packet(headers, request.json)
         verified = False
@@ -52,21 +56,6 @@ def handle_site_update_request(key):
                 subprocess.Popen(cmd.split(" "), cwd=conf['folder-path']).wait()
             return make_response(jsonify({'success': True}), 200, {'ContentType': 'application/json'})
     return abort(400)
-
-
-def verify_github_signature(key, data, signature):
-    digester = hmac.new(key.encode('UTF-8'), msg=data, digestmod=sha1)
-    digested = "sha1=" + digester.hexdigest()
-    return hmac.compare_digest(str(digested), str(signature))
-
-
-@app.route('/test/')
-def test():
-    return "<b>It Works!</b>"
-
-
-for site_key in config.keys():
-    add_url_rule('/update_{}'.format(site_key), lambda: handle_site_update_request(site_key))
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=5050, debug=True)
