@@ -30,7 +30,7 @@ def verify_github_signature(key, data, signature):
     return hmac.compare_digest(str(digested), str(signature))
 
 
-@app.route('/')
+@app.route('/', methods=('POST',))
 def handle_request():
     if request.json:
         repo_name = request.json['repository']['name']
