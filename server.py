@@ -2,18 +2,19 @@ import hmac
 import json
 import subprocess
 from hashlib import sha1
+from os import path
 
 from flask import Flask, abort, jsonify, make_response, request
 
 app = Flask(__name__)
 
+if not path.isfile(app.root_path + "/config.json"):
+    open(app.root_path + "/config.json", "w+").write("[]")
+if not path.isfile(app.root_path + "/packets.json"):
+    open(app.root_path + "/packets.json", "w+").write("[]")
+
 config = json.load(open(app.root_path + '/config.json'))
 packets = json.load(open(app.root_path + '/packets.json'))
-
-
-def commit_packets():
-    global packets
-    json.dump(packets, open(app.root_path + '/packets.json', "w+"))
 
 
 def save_packet(headers, data):
@@ -21,7 +22,7 @@ def save_packet(headers, data):
     if len(packets) > 10:
         packets = []
     packets.append({'headers': headers, 'data': data})
-    commit_packets()
+    json.dump(packets, open(app.root_path + '/packets.json', "w+"))
 
 
 def verify_github_signature(key, data, signature):
